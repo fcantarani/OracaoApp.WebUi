@@ -1,6 +1,8 @@
 import CardComponent from "@/components/Card";
 import LoadingComponent from "@/components/Loading";
 import PrayButton from "@/components/PrayButton";
+import { AddNewPrayerComponent } from "@/components/Sheet";
+
 import { Badge } from "@/components/ui/badge";
 import {
   Select,
@@ -26,7 +28,7 @@ import { useEffect, useMemo, useState } from "react";
 export default function HomePage() {
   const [isLoading, setIsLoading] = useState(true);
   const [categoryId, setCategoryId] = useState(0);
-  const [prayers, setPrayers] = useState<IPrayerModel[]>();
+  const [prayers, setPrayers] = useState<IPrayerModel[] | undefined>();
 
   const auth = useAuth();
 
@@ -36,8 +38,8 @@ export default function HomePage() {
   );
 
   const changeCategoryId = (value: string) => {
+    console.log("CAT --->", parseInt(value));
     setCategoryId(parseInt(value));
-    console.log(" CAT ->", value);
   };
 
   useEffect(() => {
@@ -53,8 +55,8 @@ export default function HomePage() {
     prayersService
       .getAllByCategoryId(categoryId)
       .then((r) => {
-        console.log("STATUS===>", r.status);
-        if (r.status >= 200 && r.status <= 299) setPrayers(r.data);
+        console.log("Chama~", r);
+        setPrayers(r.data);
       })
       .finally(() => setIsLoading(false));
   }, [prayersService, categoryId]);
@@ -70,17 +72,22 @@ export default function HomePage() {
               <span className="font-semibold">Orações</span>
               <div className="flex items-center gap-2">
                 <span>Categoria:</span>
-                <Select onValueChange={changeCategoryId}>
+                <Select
+                  onValueChange={changeCategoryId}
+                  value={categoryId.toString()}
+                >
                   <SelectTrigger className="w-[180px]">
                     <SelectValue placeholder="Todos" />
                   </SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="1">Saúde</SelectItem>
-                    <SelectItem value="2">Casamento</SelectItem>
+                    <SelectItem value="0">Todas</SelectItem>
+                    <SelectItem value="1">Casamento</SelectItem>
+                    <SelectItem value="2">Saude</SelectItem>
                     <SelectItem value="3">Finanças</SelectItem>
                   </SelectContent>
                 </Select>
               </div>
+              <AddNewPrayerComponent />
             </div>
             <CardComponent>
               <Table>
@@ -116,39 +123,43 @@ export default function HomePage() {
                   </TableRow>
                 </TableHeader>
                 <TableBody>
-                  {prayers?.map((p) => (
-                    <TableRow key={p.id}>
-                      <TableCell className="text-center">{p.id}</TableCell>
-                      <TableCell className="text-center">
-                        {moment(p.createdDate).format("DD-MMM-YYYY")}
-                      </TableCell>
-                      <TableCell className="text-left">{p.title}</TableCell>
-                      <TableCell className="text-left">
-                        {p.description}
-                      </TableCell>
-                      <TableCell className="text-left">
-                        {p.prayingForName}
-                      </TableCell>
-                      <TableCell className="text-left">
-                        {p.prayerCategory.name}
-                      </TableCell>
-                      <TableCell className="text-center">
-                        <Badge variant="secondary">
-                          {p.prayerComments.length}
-                        </Badge>
-                      </TableCell>
-                      <TableCell className="text-center">
-                        <Badge variant="secondary">
-                          {p.prayingFors.length}
-                        </Badge>
-                      </TableCell>
-                      <TableCell className="flex items-center gap-2 text-center">
-                        <PrayButton
-                          handleClick={() => console.log("Clicado foi!")}
-                        />
-                      </TableCell>
-                    </TableRow>
-                  ))}
+                  {prayers ? (
+                    prayers?.map((p) => (
+                      <TableRow key={p.id}>
+                        <TableCell className="text-center">{p.id}</TableCell>
+                        <TableCell className="text-center">
+                          {moment(p.createdDate).format("DD-MMM-YYYY")}
+                        </TableCell>
+                        <TableCell className="text-left">{p.title}</TableCell>
+                        <TableCell className="text-left">
+                          {p.description}
+                        </TableCell>
+                        <TableCell className="text-left">
+                          {p.prayingForName}
+                        </TableCell>
+                        <TableCell className="text-left">
+                          {p.prayerCategory.name}
+                        </TableCell>
+                        <TableCell className="text-center">
+                          <Badge variant="secondary">
+                            {p.prayerComments.length}
+                          </Badge>
+                        </TableCell>
+                        <TableCell className="text-center">
+                          <Badge variant="secondary">
+                            {p.prayingFors.length}
+                          </Badge>
+                        </TableCell>
+                        <TableCell className="flex items-center gap-2 text-center">
+                          <PrayButton
+                            handleClick={() => console.log("Clicado foi!")}
+                          />
+                        </TableCell>
+                      </TableRow>
+                    ))
+                  ) : (
+                    <></>
+                  )}
                 </TableBody>
               </Table>
             </CardComponent>

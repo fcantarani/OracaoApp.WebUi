@@ -1,7 +1,7 @@
 import { Button } from "@/components/ui/button";
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
-import image from "@/assets/imgs/log-out.svg";
+import { LogoutImage } from "@/components/Images/logout";
 
 export default function LogoutCallbackPage() {
   const [timeLeft, setTimeLeft] = useState(5);
@@ -26,7 +26,7 @@ export default function LogoutCallbackPage() {
     <div className="flex min-h-screen flex-col justify-center align-middle">
       <div className="flex flex-col items-center justify-center text-center">
         <p className="mb-2 text-xl">Você saiu do sistema!</p>
-        <img src={image} className="max-w-sm" />
+        <LogoutImage />
         <p className="text-sm font-light italic">
           Em <strong>{timeLeft}</strong> segundos você será direcionado para a
           home.

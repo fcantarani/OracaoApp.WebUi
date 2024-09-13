@@ -66,6 +66,17 @@ export class BaseService {
     return this.handleResponse<T>(response);
   }
 
+  protected async delete<T>(
+    url: string,
+    init?: RequestInit,
+  ): Promise<ServiceResponseModel<T>> {
+    init = this.getRequestInit(init);
+    init.method = "DELETE";
+
+    const response = await fetch(url, init);
+    return this.handleResponse<T>(response);
+  }
+
   protected makePromise<T>(obj: T): Promise<T> {
     return new Promise((resolve) => {
       setTimeout(() => {

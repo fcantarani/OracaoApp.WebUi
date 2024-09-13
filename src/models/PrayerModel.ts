@@ -7,6 +7,7 @@ export interface IPrayerModel {
   id: number;
   title: string;
   description: string;
+  prayerCategoryId: number;
   prayerCategory: IPrayerCategoryModel;
   prayingForName: string;
   prayersQuantity: number;

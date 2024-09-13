@@ -22,4 +22,10 @@ export class PrayersService extends BaseService {
 
     return this.get<IPrayerModel[]>(url);
   }
+
+  public deleteById(id: number) {
+    const url = `${this.baseUrl}/Delete/${id}`;
+
+    return this.delete<IPrayerModel[]>(url);
+  }
 }

@@ -29,6 +29,17 @@ export default function MyPrayersPage() {
   );
   const userId = auth.profile?.sub ?? "";
 
+  const deletePrayer = (value: number) => {
+    console.log("CAT --->", value);
+    prayersService
+      .deleteById(value)
+      .then((r) => {
+        setPrayers(r.data);
+        console.log(r);
+      })
+      .catch((e) => console.log("error:", e));
+  };
+
   useEffect(() => {
     setIsLoading(true);
     prayersService
@@ -113,7 +124,11 @@ export default function MyPrayersPage() {
                           <MdOutlineModeEdit size={16} />
                           <span>Editar</span>
                         </Button>
-                        <Button size={"sm"} className="gap-2 bg-destructive">
+                        <Button
+                          size={"sm"}
+                          className="gap-2 bg-destructive"
+                          onClick={() => deletePrayer(p.id)}
+                        >
                           <MdDeleteOutline size={16} />
                           <span>Deletar</span>
                         </Button>
