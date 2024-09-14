@@ -30,7 +30,6 @@ export default function MyPrayersPage() {
   const userId = auth.profile?.sub ?? "";
 
   const deletePrayer = (value: number) => {
-    console.log("CAT --->", value);
     prayersService
       .deleteById(value)
       .then((r) => {

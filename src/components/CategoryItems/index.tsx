@@ -2,19 +2,13 @@ import { useAuth } from "@/hooks/AuthHook";
 import { IPrayerCategoryModel } from "@/models/PrayerCategoryModel";
 import { CategoryService } from "@/services/CategoryService";
 import { useEffect, useMemo, useState } from "react";
-import LoadingComponent from "../Loading";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "../ui/select";
 
-export default function SelectItemsCategory() {
-  const [isLoading, setIsLoading] = useState(false);
-  const [categories, setCategories] = useState<IPrayerCategoryModel[]>();
+interface CategoryItemsProps {
+  setCategoryId: (value: number) => void;
+  handleChange: () => void;
+}
 
+export default function CategoryItems({ setCategoryId }: CategoryItemsProps) {
   const auth = useAuth();
 
   const categoryService = useMemo(
@@ -22,31 +16,23 @@ export default function SelectItemsCategory() {
     [auth.accessToken],
   );
 
+  const [categories, setCategories] = useState<IPrayerCategoryModel[]>();
+
   useEffect(() => {
-    setIsLoading(true);
-    categoryService
-      .getAll()
-      .then((r) => setCategories(r.data))
-      .finally(() => setIsLoading(false));
+    categoryService.getAll().then((r) => setCategories(r.data));
   }, [categoryService]);
 
   return (
-    <h1>
-      {isLoading ? (
-        <LoadingComponent />
-      ) : (
-        <Select>
-          <SelectTrigger>
-            <SelectValue placeholder="Selecione" />
-          </SelectTrigger>
-
-          <SelectContent>
-            {categories?.map((c) => (
-              <SelectItem value={c.id.toString()}>{c.name} </SelectItem>
-            ))}
-          </SelectContent>
-        </Select>
-      )}
-    </h1>
+    <select
+      className="rounded-md border border-slate-800 bg-transparent p-1.5"
+      name="categories"
+      id="categories"
+      onChange={(e) => setCategoryId(parseInt(e.target.value))}
+    >
+      <option value={0}>--- Selecione ---</option>
+      {categories?.map((c) => (
+        <option value={c.id.toString()}>{c.name}</option>
+      ))}
+    </select>
   );
 }

@@ -1,16 +1,10 @@
+import { AddNewPrayerComponent } from "@/components/AddNewPrayerSheet";
 import CardComponent from "@/components/Card";
+import CommentButton from "@/components/CommentButton";
 import LoadingComponent from "@/components/Loading";
 import PrayButton from "@/components/PrayButton";
-import { AddNewPrayerComponent } from "@/components/Sheet";
 
 import { Badge } from "@/components/ui/badge";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
 import {
   Table,
   TableHeader,
@@ -20,7 +14,9 @@ import {
   TableCell,
 } from "@/components/ui/table";
 import { useAuth } from "@/hooks/AuthHook";
+import { IPrayerCategoryModel } from "@/models/PrayerCategoryModel";
 import { IPrayerModel } from "@/models/PrayerModel";
+import { CategoryService } from "@/services/CategoryService";
 import { PrayersService } from "@/services/PrayersService";
 import moment from "moment";
 import { useEffect, useMemo, useState } from "react";
@@ -29,6 +25,9 @@ export default function HomePage() {
   const [isLoading, setIsLoading] = useState(true);
   const [categoryId, setCategoryId] = useState(0);
   const [prayers, setPrayers] = useState<IPrayerModel[] | undefined>();
+  const [categories, setCategories] = useState<
+    IPrayerCategoryModel[] | undefined
+  >();
 
   const auth = useAuth();
 
@@ -37,8 +36,12 @@ export default function HomePage() {
     [auth.accessToken],
   );
 
+  const categoryService = useMemo(
+    () => new CategoryService(auth.accessToken),
+    [auth.accessToken],
+  );
+
   const changeCategoryId = (value: string) => {
-    console.log("CAT --->", parseInt(value));
     setCategoryId(parseInt(value));
   };
 
@@ -52,10 +55,17 @@ export default function HomePage() {
 
   useEffect(() => {
     setIsLoading(true);
+    categoryService
+      .getAll()
+      .then((r) => setCategories(r.data))
+      .finally(() => setIsLoading(false));
+  }, [categoryService]);
+
+  useEffect(() => {
+    setIsLoading(true);
     prayersService
       .getAllByCategoryId(categoryId)
       .then((r) => {
-        console.log("Chama~", r);
         setPrayers(r.data);
       })
       .finally(() => setIsLoading(false));
@@ -72,20 +82,18 @@ export default function HomePage() {
               <span className="font-semibold">Orações</span>
               <div className="flex items-center gap-2">
                 <span>Categoria:</span>
-                <Select
-                  onValueChange={changeCategoryId}
-                  value={categoryId.toString()}
+                <select
+                  className="rounded-md border border-slate-800 bg-transparent p-1.5"
+                  name="categories"
+                  id="categories"
+                  onChange={(e) => changeCategoryId(e.target.value)}
+                  value={categoryId}
                 >
-                  <SelectTrigger className="w-[180px]">
-                    <SelectValue placeholder="Todos" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="0">Todas</SelectItem>
-                    <SelectItem value="1">Casamento</SelectItem>
-                    <SelectItem value="2">Saude</SelectItem>
-                    <SelectItem value="3">Finanças</SelectItem>
-                  </SelectContent>
-                </Select>
+                  <option value={0}>--- TODAS ---</option>
+                  {categories?.map((c) => (
+                    <option value={c.id.toString()}>{c.name}</option>
+                  ))}
+                </select>
               </div>
               <AddNewPrayerComponent />
             </div>
@@ -100,6 +108,9 @@ export default function HomePage() {
                       Criado em
                     </TableHead>
                     <TableHead className="text-left font-semibold">
+                      Categoria
+                    </TableHead>
+                    <TableHead className="text-left font-semibold">
                       Título
                     </TableHead>
                     <TableHead className="text-left font-semibold">
@@ -107,9 +118,6 @@ export default function HomePage() {
                     </TableHead>
                     <TableHead className="text-left font-semibold">
                       Orando por...
-                    </TableHead>
-                    <TableHead className="text-left font-semibold">
-                      Categoria
                     </TableHead>
                     <TableHead className="text-center font-semibold">
                       Comentários
@@ -130,15 +138,15 @@ export default function HomePage() {
                         <TableCell className="text-center">
                           {moment(p.createdDate).format("DD-MMM-YYYY")}
                         </TableCell>
+                        <TableCell className="text-left">
+                          {p.prayerCategory.name}
+                        </TableCell>
                         <TableCell className="text-left">{p.title}</TableCell>
                         <TableCell className="text-left">
                           {p.description}
                         </TableCell>
                         <TableCell className="text-left">
                           {p.prayingForName}
-                        </TableCell>
-                        <TableCell className="text-left">
-                          {p.prayerCategory.name}
                         </TableCell>
                         <TableCell className="text-center">
                           <Badge variant="secondary">
@@ -151,6 +159,9 @@ export default function HomePage() {
                           </Badge>
                         </TableCell>
                         <TableCell className="flex items-center gap-2 text-center">
+                          <CommentButton
+                            handleClick={() => console.log("Comentar")}
+                          />
                           <PrayButton
                             handleClick={() => console.log("Clicado foi!")}
                           />
